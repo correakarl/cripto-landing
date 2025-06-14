@@ -1,32 +1,53 @@
-// tailwind.config.ts
-
+/** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/**/*.{js,ts,jsx,tsx}",
+    "./pages/**/*.{js,ts,jsx,tsx}",
+    "./components/**/*.{js,ts,jsx,tsx}",
+    // Añade otras rutas según sea necesario
   ],
+  darkMode: "class", // o 'media' según prefieras
   theme: {
-    darkMode: 'class', // Activado para soporte de clase .dark
     extend: {
       colors: {
-        primary: 'rgb(var(--primary-rgb) / 1)',
-        secondary: 'rgb(var(--secondary-rgb) / 1)',
-        dark: 'rgb(var(--background-start-rgb) / 1)',
-        darker: 'rgb(var(--background-end-rgb) / 1)',
-        light: 'rgb(var(--foreground-rgb) / 1)',
+        background: {
+          DEFAULT: '#ffffff',
+          dark: '#0a0a0a',
+        },
+        foreground: {
+          DEFAULT: '#171717',
+          dark: '#ededed',
+        },
+        primary: {
+          DEFAULT: 'rgb(41, 98, 255)',
+          light: '#7dd3fc', // Añadido para el gradiente del hero
+        },
+        secondary: 'rgb(0, 230, 118)',
+        gray: {
+          600: 'rgb(75, 85, 99)',
+          800: 'rgb(31, 41, 55)',
+        },
       },
       fontFamily: {
-        sans: ['Poppins', 'sans-serif'],
+        sans: ['Poppins', 'Arial', 'Helvetica', 'sans-serif'],
       },
-      screens: {
-        xs: '480px',
-        sm: '640px',
-        md: '768px',
-        lg: '1024px',
-        xl: '1280px',
-        '2xl': '1536px',
+      backgroundImage: {
+        'hero': "url('/images/hero-bg.png')",
+      },
+      animation: {
+        float: 'float 6s ease-in-out infinite',
+      },
+      keyframes: {
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-10px)' },
+        },
       },
     },
   },
-  plugins: [],
-};
+  plugins: [
+    // require('@tailwindcss/forms'), // Opcional, si usas forms
+    // require('@tailwindcss/typography'), // Opcional, si usas typography
+    // Otros plugins que necesites
+  ],
+}

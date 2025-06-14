@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowUpRight, BarChart2, ChevronDown, Loader2, Search } from 'lucide-react'
 import axios from 'axios'
-import Image from 'next/image'
 
 interface CryptoData {
     id: string
@@ -30,6 +29,16 @@ const CryptoExplorer = () => {
         key: 'market_cap',
         direction: 'desc'
     })
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(10); // Puedes ajustar este número
+
+    // Calcular ítems actuales
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+
+    // Cambiar página
+    const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
     // Fetch data from API
     useEffect(() => {
@@ -70,6 +79,8 @@ const CryptoExplorer = () => {
         crypto.name.toLowerCase().includes(filter.toLowerCase()) ||
         crypto.symbol.toLowerCase().includes(filter.toLowerCase())
     )
+
+    const currentItems = filteredCryptos.slice(indexOfFirstItem, indexOfLastItem);
 
     // Formatting functions
     const formatCurrency = (value: number): string => {
@@ -174,7 +185,143 @@ const CryptoExplorer = () => {
                     <div className="overflow-hidden">
                         {/* Versión desktop */}
                         <div className="hidden md:block">
-                            {/* ... (código de tabla existente) ... */}
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                whileInView={{ opacity: 1 }}
+                                transition={{ duration: 0.5 }}
+                                className="overflow-x-auto"
+                            >
+                                <table className="min-w-full divide-y divide-gray-700">
+                                    <thead className="bg-gray-800">
+                                        <tr>
+                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                                #
+                                            </th>
+                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                                Activo
+                                            </th>
+                                            <th
+                                                scope="col"
+                                                className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-white"
+                                                onClick={() => requestSort('current_price')}
+                                            >
+                                                <div className="flex justify-end items-center gap-1">
+                                                    Precio
+                                                    {sortConfig.key === 'current_price' && (
+                                                        <ChevronDown className={`h-4 w-4 transition-transform ${sortConfig.direction === 'asc' ? 'rotate-180' : ''}`} />
+                                                    )}
+                                                </div>
+                                            </th>
+                                            <th
+                                                scope="col"
+                                                className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-white"
+                                                onClick={() => requestSort('price_change_percentage_24h')}
+                                            >
+                                                <div className="flex justify-end items-center gap-1">
+                                                    24h %
+                                                    {sortConfig.key === 'price_change_percentage_24h' && (
+                                                        <ChevronDown className={`h-4 w-4 transition-transform ${sortConfig.direction === 'asc' ? 'rotate-180' : ''}`} />
+                                                    )}
+                                                </div>
+                                            </th>
+                                            <th
+                                                scope="col"
+                                                className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-white"
+                                                onClick={() => requestSort('market_cap')}
+                                            >
+                                                <div className="flex justify-end items-center gap-1">
+                                                    Capitalización
+                                                    {sortConfig.key === 'market_cap' && (
+                                                        <ChevronDown className={`h-4 w-4 transition-transform ${sortConfig.direction === 'asc' ? 'rotate-180' : ''}`} />
+                                                    )}
+                                                </div>
+                                            </th>
+                                            <th scope="col" className="relative px-6 py-3">
+                                                <span className="sr-only">Detalles</span>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="bg-gray-800 divide-y divide-gray-700">
+                                        {currentItems.map((crypto, index) => (
+                                            <motion.tr
+                                                key={crypto.id}
+                                                initial={{ opacity: 0, y: 10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                transition={{ duration: 0.3, delay: index * 0.02 }}
+                                                whileHover={{ backgroundColor: 'rgba(39, 39, 42, 0.5)' }}
+                                                className="hover:bg-gray-700/50 transition-colors cursor-pointer"
+                                                onClick={() => setSelectedCrypto(crypto)}
+                                            >
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                                                    {(currentPage - 1) * itemsPerPage + index + 1}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="flex items-center">
+                                                        <img
+                                                            src={crypto.image}
+                                                            alt={crypto.name}
+                                                            width={32}
+                                                            height={32}
+                                                            className="w-8 h-8 rounded-full mr-3"
+                                                        />
+                                                        <div>
+                                                            <div className="text-sm font-medium text-white">{crypto.name}</div>
+                                                            <div className="text-sm text-gray-400 uppercase">{crypto.symbol}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-white text-right">
+                                                    {formatCurrency(crypto.current_price)}
+                                                </td>
+                                                <td className={`px-6 py-4 whitespace-nowrap text-sm text-right ${crypto.price_change_percentage_24h >= 0 ? 'text-green-400' : 'text-red-400'
+                                                    }`}>
+                                                    {formatPercentage(crypto.price_change_percentage_24h)}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 text-right">
+                                                    {formatLargeNumber(crypto.market_cap)}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                    <button className="text-primary hover:text-primary/80">
+                                                        <ArrowUpRight className="h-5 w-5" />
+                                                    </button>
+                                                </td>
+                                            </motion.tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </motion.div>
+
+                            {/* Paginador */}
+                            <div className="flex items-center justify-between mt-6">
+                                <div className="text-sm text-gray-400">
+                                    Mostrando {(currentPage - 1) * itemsPerPage + 1} a {Math.min(currentPage * itemsPerPage, filteredCryptos.length)} de {filteredCryptos.length} resultados
+                                </div>
+                                <div className="flex space-x-2">
+                                    <button
+                                        onClick={() => paginate(currentPage - 1)}
+                                        disabled={currentPage === 1}
+                                        className={`px-4 py-2 rounded-lg ${currentPage === 1 ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-700 text-white hover:bg-gray-600'}`}
+                                    >
+                                        Anterior
+                                    </button>
+                                    {Array.from({ length: Math.ceil(filteredCryptos.length / itemsPerPage) }).map((_, index) => (
+                                        <button
+                                            key={index}
+                                            onClick={() => paginate(index + 1)}
+                                            className={`px-4 py-2 rounded-lg ${currentPage === index + 1 ? 'bg-primary text-white' : 'bg-gray-700 text-white hover:bg-gray-600'}`}
+                                        >
+                                            {index + 1}
+                                        </button>
+                                    ))}
+                                    <button
+                                        onClick={() => paginate(currentPage + 1)}
+                                        disabled={currentPage === Math.ceil(filteredCryptos.length / itemsPerPage)}
+                                        className={`px-4 py-2 rounded-lg ${currentPage === Math.ceil(filteredCryptos.length / itemsPerPage) ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-700 text-white hover:bg-gray-600'}`}
+                                    >
+                                        Siguiente
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
                         {/* Versión móvil */}
@@ -185,7 +332,7 @@ const CryptoExplorer = () => {
                                 transition={{ duration: 0.5 }}
                                 className="grid grid-cols-1 gap-4"
                             >
-                                {filteredCryptos.map((crypto, index) => (
+                                {currentItems.map((crypto, index) => (
                                     <motion.div
                                         key={crypto.id}
                                         whileHover={{ y: -5 }}
@@ -198,6 +345,8 @@ const CryptoExplorer = () => {
                                                 <img
                                                     src={crypto.image}
                                                     alt={crypto.name}
+                                                    width={32}
+                                                    height={32}
                                                     className="w-10 h-10 mr-3"
                                                 />
                                                 <div>
@@ -211,8 +360,8 @@ const CryptoExplorer = () => {
                                                 </p>
                                                 <p
                                                     className={`text-xs ${crypto.price_change_percentage_24h >= 0
-                                                            ? 'text-green-400'
-                                                            : 'text-red-400'
+                                                        ? 'text-green-400'
+                                                        : 'text-red-400'
                                                         }`}
                                                 >
                                                     {crypto.price_change_percentage_24h >= 0 ? '↑' : '↓'}
@@ -223,6 +372,40 @@ const CryptoExplorer = () => {
                                     </motion.div>
                                 ))}
                             </motion.div>
+
+                            {/* Paginador móvil */}
+                            <div className="flex flex-col items-center mt-6 space-y-4">
+                                <div className="text-sm text-gray-400 text-center">
+                                    Mostrando {(currentPage - 1) * itemsPerPage + 1} a {Math.min(currentPage * itemsPerPage, filteredCryptos.length)} de {filteredCryptos.length} resultados
+                                </div>
+                                <div className="flex space-x-2">
+                                    <button
+                                        onClick={() => paginate(currentPage - 1)}
+                                        disabled={currentPage === 1}
+                                        className={`px-4 py-2 rounded-lg ${currentPage === 1 ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-700 text-white hover:bg-gray-600'}`}
+                                    >
+                                        Anterior
+                                    </button>
+                                    <div className="flex space-x-1 overflow-x-auto max-w-[200px]">
+                                        {Array.from({ length: Math.ceil(filteredCryptos.length / itemsPerPage) }).map((_, index) => (
+                                            <button
+                                                key={index}
+                                                onClick={() => paginate(index + 1)}
+                                                className={`px-3 py-2 rounded-lg text-sm ${currentPage === index + 1 ? 'bg-primary text-white' : 'bg-gray-700 text-white hover:bg-gray-600'}`}
+                                            >
+                                                {index + 1}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <button
+                                        onClick={() => paginate(currentPage + 1)}
+                                        disabled={currentPage === Math.ceil(filteredCryptos.length / itemsPerPage)}
+                                        className={`px-4 py-2 rounded-lg ${currentPage === Math.ceil(filteredCryptos.length / itemsPerPage) ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-700 text-white hover:bg-gray-600'}`}
+                                    >
+                                        Siguiente
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 )}
@@ -246,7 +429,10 @@ const CryptoExplorer = () => {
                             >
                                 <div className="flex justify-between items-start mb-6">
                                     <div className="flex items-center space-x-4">
-                                        <Image src={selectedCrypto.image} alt={selectedCrypto.name} className="w-12 h-12" />
+                                        <img src={selectedCrypto.image}
+                                            width={32}
+                                            height={32}
+                                            alt={selectedCrypto.name} className="w-12 h-12" />
                                         <div>
                                             <h3 className="text-2xl font-bold text-white">{selectedCrypto.name}</h3>
                                             <p className="text-gray-400 uppercase">{selectedCrypto.symbol}</p>

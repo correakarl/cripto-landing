@@ -1,10 +1,9 @@
-/* src/styles/globals.css */
+@import "tailwindcss";
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Configuración para fuentes TTF */
 @font-face {
   font-family: "Poppins";
   src: url("/fonts/Poppins-Regular.ttf") format("truetype");
@@ -37,25 +36,38 @@
   font-display: swap;
 }
 
-/* Variables CSS personalizadas */
 :root {
+  --background: #ffffff;
+  --foreground: #171717;
   --foreground-rgb: 248, 250, 252;
   --background-start-rgb: 15, 23, 42;
   --background-end-rgb: 2, 6, 23;
   --primary-rgb: 41, 98, 255;
   --secondary-rgb: 0, 230, 118;
+  --gray-600: 75, 85, 99; /* #4B5563 */
+  --gray-800: 31, 41, 55; /* #1F2937 */
 }
 
-/* Reset básico y consistencia visual */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
 }
 
-/* Base styles */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
 @layer base {
   html {
     @apply scroll-smooth;
@@ -79,68 +91,29 @@
     overflow-x: hidden;
     width: 100%;
   }
-}
 
-/* Estilos básicos para elementos estructurales */
-header,
-section,
-footer,
-article,
-aside,
-nav {
-  @apply block;
-}
+  .bg-primary {
+    background-color: rgb(var(--primary-rgb));
+  }
 
-header {
-  position: relative;
-  z-index: 50;
-  background-color: rgb(var(--background-start-rgb));
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  transition: background-color 0.3s ease;
-}
-
-header.scrolled {
-  background-color: rgb(var(--background-start-rgb) / 0.95);
-  backdrop-filter: blur(10px);
-}
-
-/* Colores predefinidos basados en variables */
-.bg-primary {
-  background-color: rgb(var(--primary-rgb) / 1);
-}
-
-.text-primary {
-  color: rgb(var(--primary-rgb) / 1);
-}
-
-.bg-secondary {
-  background-color: rgb(var(--secondary-rgb) / 1);
-}
-
-.text-secondary {
-  color: rgb(var(--secondary-rgb) / 1);
-}
-
-/* Clases utilitarias adicionales */
-.container,
-.section,
-.wrapper {
-  position: relative;
+  .hover\:bg-primary\/90:hover {
+    background-color: rgba(41, 98, 255, 0.9);
+  }
 }
 
 /* Componentes reutilizables */
 @layer components {
   /* Botones */
   .btn {
-    @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:pointer-events-none;
+    @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:pointer-events-none;
   }
 
   .btn-primary {
-    @apply bg-primary hover:bg-primary/90 text-white px-6 py-3 shadow-lg shadow-primary/30;
+    @apply text-white px-6 py-3 shadow-lg;
   }
 
   .btn-secondary {
-    @apply bg-secondary hover:bg-secondary/90 text-gray-900 px-6 py-3;
+    @apply text-gray-900 px-6 py-3;
   }
 
   .btn-outline {
@@ -154,7 +127,7 @@ header.scrolled {
 
   /* Inputs */
   .input {
-    @apply w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent placeholder-gray-400;
+    @apply w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-transparent placeholder-gray-400;
   }
 
   /* Badges */
@@ -163,7 +136,11 @@ header.scrolled {
   }
 
   .badge-primary {
-    @apply bg-primary/10 text-primary border border-primary/20;
+    @apply border;
+  }
+
+  .text-primary-dark {
+    @apply text-gray-900;
   }
 }
 
@@ -177,7 +154,9 @@ header.scrolled {
   /* Scrollbar personalizado */
   .scrollbar-custom {
     scrollbar-width: thin;
-    scrollbar-color: theme("colors.gray.600") theme("colors.gray.800");
+    /* scrollbar-color: theme("colors.gray.600") theme("colors.gray.800"); */
+    /* scrollbar-color: #4b5563 #1f2937; */
+    scrollbar-color: rgb(var(--gray-600)) rgb(var(--gray-800));
   }
 
   .scrollbar-custom::-webkit-scrollbar {
@@ -223,9 +202,15 @@ header.scrolled {
   }
 }
 
+.hero-section {
+  background-image: url("/images/hero-bg.png");
+  background-size: cover;
+  background-position: center;
+}
+
 /* Selección de texto */
 ::selection {
-  @apply bg-primary/80 text-white;
+  @apply text-white;
 }
 
 /* Placeholder styling */
@@ -235,5 +220,5 @@ header.scrolled {
 
 /* Focus styles */
 :focus-visible {
-  @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-gray-900;
+  @apply outline-none ring-2 ring-offset-2 ring-offset-gray-900;
 }
